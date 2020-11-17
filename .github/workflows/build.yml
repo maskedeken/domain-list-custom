@@ -17,15 +17,13 @@ jobs:
         with:
           go-version: ^1.15
 
-      - name: Compare latest tags and set variables
+      - name: Set variables
         run: |
-          upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/domain-list-community/releases/latest | grep "tag_name" | cut -d\" -f4)
-          thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
-          if [[ $upstreamLatestTag != $thisLatestTag ]]; then
-            echo "NeedToSync=true" >> $GITHUB_ENV
-          fi
-          echo "RELEASE_NAME=$upstreamLatestTag" >> $GITHUB_ENV
-          echo "TAG_NAME=$upstreamLatestTag" >> $GITHUB_ENV
+          echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf" >> $GITHUB_ENV
+          echo "GOOGLE_DOMAINS_URL=https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/google.china.conf" >> $GITHUB_ENV
+          echo "APPLE_DOMAINS_URL=https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/apple.china.conf" >> $GITHUB_ENV
+          echo "GFWLIST_DOMAINS_URL=https://cokebar.github.io/gfwlist2dnsmasq/gfwlist_domain.txt" >> $GITHUB_ENV
+          echo "GFWLIST_EXTRAS_DOMAINS_URL=https://raw.githubusercontent.com/pexcn/gfwlist-extras/master/gfwlist-extras.txt" >> $GITHUB_ENV
         shell: bash
 
       - name: Checkout codebase
@@ -37,19 +35,27 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: v2fly/domain-list-community
-          path: domain-list-community
+          path: community
 
       - name: Append attribute rules
         if: ${{ env.NeedToSync }}
         run: |
-          echo "include:geolocation-!cn@cn" >> ./domain-list-community/data/cn
-          echo "include:geolocation-cn@!cn" >> ./domain-list-community/data/geolocation-\!cn
+          echo "include:geolocation-!cn@cn" >> ./community/data/cn
+          echo "include:geolocation-cn@!cn" >> ./community/data/geolocation-\!cn
 
-      - name: Get dependencies and run
+      - name: Create `google-cn`、`apple-cn`、`gfw`、 lists
+        if: ${{ env.NeedToSync }}
+        run: |
+          curl -sSL $GOOGLE_DOMAINS_URL | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > ./community/data/google-cn
+          curl -sSL $APPLE_DOMAINS_URL | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > ./community/data/apple-cn
+          curl -sSL $GFWLIST_DOMAINS_URL | perl -ne '/^((?=^.{3,255})[a-zA-Z0-9][-_a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-_a-zA-Z0-9]{0,62})+)/ && print "$1\n"' >> ./community/data/gfw
+          curl -sSL $GFWLIST_EXTRAS_DOMAINS_URL | perl -ne 'print if not /^(#|\s)/' >> ./community/data/gfw
+
+      - name: Build geosite.dat file
         if: ${{ env.NeedToSync }}
         run: |
           go mod download
-          go run ./ --datapath=./domain-list-community/data
+          go run ./ --datapath=./community/data
 
       - name: Rename to geosite.dat && generate sha256 hash
         if: ${{ env.NeedToSync }}
