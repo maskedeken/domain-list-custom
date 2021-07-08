@@ -24,11 +24,12 @@ jobs:
           echo "APPLE_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/apple-cn.txt" >> $GITHUB_ENV
           echo "GFWLIST_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/gfw.txt" >> $GITHUB_ENV
           echo "PROXY_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/proxy-list.txt" >> $GITHUB_ENV
-          upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/domain-list-community/releases/latest | grep "tag_name" | cut -d\" -f4)
-          thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
-          if [[ $upstreamLatestTag != $thisLatestTag ]]; then
-            echo "NeedToSync=true" >> $GITHUB_ENV
-          fi
+          echo "NeedToSync=true" >> $GITHUB_ENV
+          #upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/domain-list-community/releases/latest | grep "tag_name" | cut -d\" -f4)
+          #thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
+          #if [[ $upstreamLatestTag != $thisLatestTag ]]; then
+          #  echo "NeedToSync=true" >> $GITHUB_ENV
+          #fi
           echo "RELEASE_NAME=$upstreamLatestTag" >> $GITHUB_ENV
           echo "TAG_NAME=$upstreamLatestTag" >> $GITHUB_ENV
         shell: bash
