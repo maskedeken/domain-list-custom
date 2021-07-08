@@ -20,7 +20,6 @@ jobs:
       - name: Set variables
         run: |
           echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt" >> $GITHUB_ENV
-          echo "GFWLIST_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/gfw.txt" >> $GITHUB_ENV
           echo "PROXY_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/proxy-list.txt" >> $GITHUB_ENV
           upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/domain-list-community/releases/latest | grep "tag_name" | cut -d\" -f4)
           thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
@@ -43,11 +42,10 @@ jobs:
           repository: v2fly/domain-list-community
           path: community
 
-      - name: Create `cn`, `gfw`, `geolocation-!cn` lists
+      - name: Create `cn`, `geolocation-!cn` lists
         if: ${{ env.NeedToSync }}
         run: |
           curl -sSL $CHINA_DOMAINS_URL > ./community/data/cn
-          curl -sSL $GFWLIST_DOMAINS_URL > ./community/data/gfw
           curl -sSL $PROXY_DOMAINS_URL > ./community/data/geolocation-\!cn
 
       - name: Build geosite.dat file
