@@ -31,10 +31,6 @@ jobs:
           echo "TAG_NAME=$upstreamLatestTag" >> $GITHUB_ENV
         shell: bash
 
-      - name: Checkout codebase
-        uses: actions/checkout@v2
-        if: ${{ env.NeedToSync }}
-
       - name: Checkout v2fly/domain-list-community
         if: ${{ env.NeedToSync }}
         uses: actions/checkout@v2
@@ -55,8 +51,10 @@ jobs:
       - name: Build geosite.dat file
         if: ${{ env.NeedToSync }}
         run: |
+          mkdir -p publish
+          cd community
           go mod download
-          go run ./ --datapath=./community/data
+          go run ./ -datapath=./data -outputdir=../publish -exportlists=cn,category-ads-all,geolocation-!cn
 
       - name: Rename to geosite.dat && generate sha256 hash
         if: ${{ env.NeedToSync }}
