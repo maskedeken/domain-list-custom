@@ -8,7 +8,7 @@
 
 ## 下载地址
 
-- [https://github.com/maskedeken/domain-list-custom/blob/release/geosite.dat](https://github.com/maskedeken/domain-list-custom/blob/release/geosite.dat)
+- [https://raw.githubusercontent.com/maskedeken/domain-list-custom/release/geosite.dat](https://raw.githubusercontent.com/maskedeken/domain-list-custom/release/geosite.dat)
 
 ## 本项目依赖的项目
 
