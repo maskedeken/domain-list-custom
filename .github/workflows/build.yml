@@ -44,7 +44,7 @@ jobs:
           mv ./community/data ./community/data.bak
           mkdir -p ./community/data
           cp ./community/data.bak/private ./community/data
-          curl -sSL $CHINA_DOMAINS_URL > ./community/data/cn
+          curl -sSL $CHINA_DOMAINS_URL | sed '/tiktok/d' > ./community/data/cn
           curl -sSL $PROXY_DOMAINS_URL > ./community/data/geolocation-\!cn
           curl -sSL $REJECT_DOMAINS_URL > ./community/data/category-ads-all
 
