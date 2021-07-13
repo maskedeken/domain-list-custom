@@ -46,7 +46,7 @@ jobs:
           cp ./community/data.bak/private ./community/data
           curl -sSL $CHINA_DOMAINS_URL | sed '/tiktok/d' > ./community/data/cn
           curl -sSL $PROXY_DOMAINS_URL > ./community/data/geolocation-\!cn
-          curl -sSL $REJECT_DOMAINS_URL > ./community/data/category-ads-all
+          curl -sSL $REJECT_DOMAINS_URL | sed  s/:@.\\+// > ./community/data/category-ads-all
 
       - name: Build geosite.dat file
         if: ${{ env.NeedToSync }}
