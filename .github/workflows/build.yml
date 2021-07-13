@@ -19,8 +19,8 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/v2fly/domain-list-community/release/cn.txt" >> $GITHUB_ENV
-          upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/v2fly/domain-list-community/releases/latest | grep "tag_name" | cut -d\" -f4)
+          echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt" >> $GITHUB_ENV
+          upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest | grep "tag_name" | cut -d\" -f4)
           thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
           if [[ $upstreamLatestTag != $thisLatestTag ]]; then
             echo "NeedToSync=true" >> $GITHUB_ENV
@@ -39,7 +39,8 @@ jobs:
       - name: Remove tiktok from cn
         if: ${{ env.NeedToSync }}
         run: |
-          curl -sSL $CHINA_DOMAINS_URL | sed  s/:@.\\+// > direct-list.txt
+          curl -sSL $CHINA_DOMAINS_URL > direct-list.txt
+          sed -i '/^s*$/d' ./community/data/tiktok
           grep -v -x -f ./community/data/tiktok direct-list.txt > ./community/data/cn
 
       - name: Build geosite.dat file
