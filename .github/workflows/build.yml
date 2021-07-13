@@ -19,9 +19,8 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "REJECT_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/domain-list-custom/release/category-ads-all.txt" >> $GITHUB_ENV
-          echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt" >> $GITHUB_ENV
-          echo "PROXY_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/proxy-list.txt" >> $GITHUB_ENV
+          echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/domain-list-custom/release/cn.txt" >> $GITHUB_ENV
+          echo "PROXY_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/domain-list-custom/release/geolocation-!cn.txt" >> $GITHUB_ENV
           echo "TIKTOK_DOMAINS_URL=https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/tiktok" >> $GITHUB_ENV
           upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest | grep "tag_name" | cut -d\" -f4)
           thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
@@ -42,14 +41,10 @@ jobs:
       - name: Create `cn`, `geolocation-!cn`, `category-ads-all` lists
         if: ${{ env.NeedToSync }}
         run: |
-          mv ./community/data ./community/data.bak
-          mkdir -p ./community/data
-          cp ./community/data.bak/private ./community/data
-          curl -sSL $CHINA_DOMAINS_URL | sort --ignore-case -u > direct-list-sort.txt
-          curl -sSL $TIKTOK_DOMAINS_URL | sort --ignore-case -u > tiktok-list-sort.txt
-          comm -23 direct-list-sort.txt tiktok-list-sort.txt > ./community/data/cn
-          curl -sSL $PROXY_DOMAINS_URL > ./community/data/geolocation-\!cn
-          curl -sSL $REJECT_DOMAINS_URL | sed  s/:@.\\+// > ./community/data/category-ads-all
+          curl -sSL $CHINA_DOMAINS_URL > direct-list.txt
+          curl -sSL $TIKTOK_DOMAINS_URL | sed '/^\s*$/d' > tiktok.txt
+          grep -v -x -f tiktok.txt direct-list.txt | sed  s/:@.\\+// > ./community/data/cn
+          curl -sSL $PROXY_DOMAINS_URL | sed  s/:@.\\+// > ./community/data/geolocation-\!cn
 
       - name: Build geosite.dat file
         if: ${{ env.NeedToSync }}
