@@ -53,7 +53,7 @@ jobs:
           go mod download
           go run ./ -datapath=./data -outputdir=../publish -exportlists=cn,category-ads-all,geolocation-!cn
 
-      - name: Rename to geosite.dat && generate sha256 hash
+      - name: Rename to geosite.dat and generate sha256 hash
         if: ${{ env.NeedToSync }}
         run: |
           cd publish || exit 1
