@@ -20,6 +20,8 @@ jobs:
       - name: Set variables
         run: |
           echo "CHINA_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt" >> $GITHUB_ENV
+          echo "PROXY_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/proxy-list.txt" >> $GITHUB_ENV
+          echo "REJECT_DOMAINS_URL=https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/reject-list.txt" >> $GITHUB_ENV
           upstreamLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest | grep "tag_name" | cut -d\" -f4)
           thisLatestTag=$(curl -sSL --connect-timeout 5 -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/releases/latest | grep "tag_name" | cut -d\" -f4)
           if [[ $upstreamLatestTag != $thisLatestTag ]]; then
@@ -39,9 +41,12 @@ jobs:
       - name: Remove tiktok from cn
         if: ${{ env.NeedToSync }}
         run: |
+          mkdir -p ./community/data2
+          curl -sSL $PROXY_DOMAINS_URL > './community/data2/geolocation-!cn'
+          curl -sSL $REJECT_DOMAINS_URL > './community/data2/category-ads-all'
           curl -sSL $CHINA_DOMAINS_URL > direct-list.txt
           sed -i '/^s*$/d' ./community/data/tiktok
-          grep -v -x -f ./community/data/tiktok direct-list.txt > ./community/data/cn
+          grep -v -x -f ./community/data/tiktok direct-list.txt > ./community/data2/cn
 
       - name: Build geosite.dat file
         if: ${{ env.NeedToSync }}
@@ -49,7 +54,7 @@ jobs:
           mkdir -p publish
           cd community
           go mod download
-          go run ./ -datapath=./data -outputdir=../publish -exportlists=cn,category-ads-all,geolocation-!cn
+          go run ./ -datapath=./data2 -outputdir=../publish -exportlists=cn,category-ads-all,geolocation-!cn
 
       - name: Rename to geosite.dat and generate sha256 hash
         if: ${{ env.NeedToSync }}
